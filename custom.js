@@ -206,9 +206,7 @@ function loadTable(table_id = "#basic-datatable", url = "", columns=[], default_
       handle_checkboxes();
     }
   }
-  table_instance = $(`${table_id}`).on('preXhr.dt', function (e, settings, data) {
-    console.log("🚀 ~ file: custom.js:211 ~ data:", data)
-  }).DataTable(options);
+  table_instance = $(`${table_id}`).DataTable(options);
   // console.log(table_instance);
 }
 
