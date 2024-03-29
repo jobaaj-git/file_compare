@@ -2,18 +2,13 @@
 include "pin/header.php";
 include "pin/sidenav.php";
 
-$user_name = $_SESSION['user_name'];
-$emp_id = $_SESSION['emp_id'];
-$user_role = $_SESSION['user_role'];
-
-
 $month = isset($_GET['month']) ? $_GET['month'] : date("Y-m");
-$eid = isset($_GET['emp_id']) ? $_GET['emp_id'] : $emp_id;
+$eid = isset($_GET['user_id']) ? $_GET['user_id'] : $user_id;
 
 if ($user_role != 0) {
-    if (isset($_GET['emp_id'])) {
-        $ex = mysqli_num_rows(mysqli_query($db, "select id from users where employee_id='$_GET[emp_id]' and leader='$emp_id'"));
-        if ($ex == 0 && $_GET['emp_id'] != $emp_id) {
+    if (isset($_GET['user_id'])) {
+        $ex = mysqli_num_rows(mysqli_query($db, "select id from users where id='$_GET[user_id]' and leader='$user_id'"));
+        if ($ex == 0 && $_GET['user_id'] != $user_id) {
             echo "<script>location.href='404'</script>";
         }
     }
@@ -228,7 +223,7 @@ include "pin/footer.php";
 
 
 <script>
-    fetch_employees('employee_id', '<?php echo isset($_GET['emp_id']) ? $_GET['emp_id'] : $emp_id; ?>', '<?php echo $currentPageName; ?>');
+    fetch_employees('employee_id', '<?php echo isset($_GET['user_id']) ? $_GET['user_id'] : $user_id; ?>', '<?php echo $currentPageName; ?>');
     
     var final_employee_id = `${($('#employee_id').val()=='' || $('#employee_id').val()==undefined || $('#employee_id').val()==null)?'<?php echo $eid; ?>':$('#employee_id').val()}`;
     function get_final_employee_id() {
@@ -329,7 +324,7 @@ include "pin/footer.php";
                 }),
             });
             let data = await response.json();
-            // console.log(data);
+            // console.log("🚀 ~ calendarObj.on ~ data:", data)
             if (data.noData == undefined) {
 
                 let leave_request ='';
@@ -413,7 +408,7 @@ include "pin/footer.php";
                         issue_html += `</select></div>`;
                     }
                 }else{
-                        issue_html += `<p class="mb-0 text-danger">You are Utilize your Monthly Leave Limit.</p>`;
+                        issue_html += `<p class="mb-0 text-danger">You have Utilize your Monthly Leave Limit.</p>`;
                 }
 
                 $('#right_sidebar_details').html(issue_html);
@@ -424,7 +419,7 @@ include "pin/footer.php";
         });
         <?php if ($user_role > 0) { ?>
             calendarObj.on('dateClick', async function(e) {
-                if(('<?php echo $user_role; ?>'==1 && '<?php echo $emp_id; ?>'==get_final_employee_id()) || '<?php echo $user_role; ?>'==2){
+                if(('<?php echo $user_role; ?>'==1 && '<?php echo $user_id; ?>'==get_final_employee_id()) || '<?php echo $user_role; ?>'==2){
 
                     // console.log(e.date);
                     let fdcDate = e.dateStr;
@@ -479,7 +474,7 @@ include "pin/footer.php";
             })
         });
         let data = await response.json();
-        console.log(data);
+        // console.log("🚀 ~ getData ~ data:", data)
 
         // set days count
         for (const [key, value] of Object.entries(data.statusCount)) {
@@ -664,7 +659,7 @@ include "pin/footer.php";
                 if(res==1){
                     successMessage('Attendance Added Successfully!','<?php echo $_SESSION['user_name']; ?>');
                 }else if(res==2){
-                    successMessage(`This employee attendance for ${$('#insert_which_month').val()} exist.`,'<?php echo $_SESSION['user_name']; ?>');
+                    failedMessage(`This employee attendance for ${$('#insert_which_month').val()} exist.`,'<?php echo $_SESSION['user_name']; ?>');
                 }else{
                     failedMessage('Some Error Occurred, Please Try Again after some time.','<?php echo $_SESSION['user_name']; ?>');
                 }
@@ -784,7 +779,7 @@ include "pin/footer.php";
             let attendance_utilize_id = $("#attendance_utilize_id").val();
             let currentEventDate = $("#currentEventDate").text();
 
-            console.log(utilize_to, attendance_utilize_id, currentEventDate);
+            // console.log(utilize_to, attendance_utilize_id, currentEventDate);
             $.ajax({
                 url:'fun/function',
                 type:'post',
