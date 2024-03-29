@@ -265,19 +265,30 @@ function find_total_leave($financial_year_start, $financial_year_end, $getMonth,
         if($total_leave['applicable_from']>$total_leave['prev_applicable_from']){
             
             // ##################
-            $st = ($total_leave['applicable_from']>date('Y-m',strtotime($joining_date)))?"$total_leave[applicable_from]-01":$joining_date;
-                $date1=date_create($st);
-                $date2=date_create(date('Y-03-01',strtotime("$total_leave[prev_applicable_from] +1 year")));
-                $diff=date_diff($date1,$date2);
-                $remaining_months_from_applicable = $diff->m +1;
+            $st = ($total_leave['prev_applicable_from']>date('Y-m',strtotime($joining_date)))?"$total_leave[prev_applicable_from]-01":$joining_date;
+
+            $date_num = date('d',strtotime($st));
+            if($date_num>'07' && $date_num<='20'){
+                $based_month_leave = [0.5, 0.5];
+            }else if($date_num>'20' && $date_num<=date('t',strtotime($st))){
+                $based_month_leave = [0, 0.5];
+            }else{
+                $based_month_leave = [1, 0.5];
+            }
+
+            $date1=date_create($st);
+            $date2=date_create(date('Y-m-t',strtotime("$total_leave[prev_applicable_to]")));
+            $diff=date_diff($date1,$date2);
+            $remaining_months_from_applicable = $diff->m;
             $u_leave_number = explode(',', $total_leave['leave_number']);
             foreach($u_leave_number as $i=> $v){
                 $u_leave_number[$i] = $u_leave_number[$i]/12*$remaining_months_from_applicable;
+                $u_leave_number[$i] += $based_month_leave[$i];
             }
             $prev_year_leave = $u_leave_number;
             // ##################
-            // $total_leave['prev_year_leave'] = $prev_year_leave;
-            // $total_leave['joining_date'] = $joining_date;
+            $total_leave['prev_year_leave'] = $prev_year_leave;
+            $total_leave['joining_date'] = $joining_date;
             $carry_forward_limit = $total_leave['max_carry_forward']/sizeof($prev_year_leave);
 
 
@@ -301,6 +312,7 @@ function find_total_leave($financial_year_start, $financial_year_end, $getMonth,
             // add in current year
             foreach($prev_year_leave as $i=>$v){
                 $prev_year_leave[$i] = ($prev_year_leave[$i]<$carry_forward_limit)?$prev_year_leave[$i]:$carry_forward_limit;
+                $leave_number[$i] += $prev_year_leave[$i];
             }
 
         }
